@@ -5,11 +5,9 @@ import asyncio
 import random
 import logging
 
-# Настройка логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Списки для идей
 GIFT_IDEAS = [
     "Подарочный сертификат в любимый магазин. Совет: выбирайте сертификаты универсальных магазинов, чтобы получатель мог выбрать то, что ему действительно нужно. https://www.sportmaster.ru/catalog/podarochnye_karty_/?utm_referrer=https%3A%2F%2Fwww.google.com%2F",
     "Теплый плед с новогодним рисунком. Пример такого пледа: https://www.wildberries.ru/catalog/163712042/detail.aspx?targetUrl=SN",
@@ -34,12 +32,10 @@ TRADITIONS = [
     "В Шотландии популярна традиция 'Первый гость': первый человек, переступивший порог в новом году, приносит удачу. Вот более подробно про данную традицию: https://dzen.ru/a/X81YQHAthFoTIwuk"
 ]
 
-# Инициализация бота
-BOT_TOKEN = "7826090291:AAESXxALZ_lFV1jE6YBWY3VRaI4r2c4F8pI"  # Замените на ваш токен
+BOT_TOKEN = "7826090291:AAESXxALZ_lFV1jE6YBWY3VRaI4r2c4F8pI"  
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
 
-# Состояния пользователей
 USER_STATE = {}
 
 def create_main_keyboard():
@@ -54,12 +50,10 @@ def create_main_keyboard():
 
 @dp.message_handler(commands=['start'])
 async def start_command(message: types.Message):
-    # Инициализация состояния пользователя, если его нет
     user_id = message.from_user.id
     if user_id not in USER_STATE:
         USER_STATE[user_id] = {'category': None, 'seen_categories': [], 'seen_items': {'gifts': [], 'recipes': [], 'traditions': []}}
 
-    # Ответ и отображение кнопок
     await message.answer(
         "Привет! Я готов помочь выбрать идею для новогоднего ужина или подарка! Что тебя интересует?",
         reply_markup=create_main_keyboard()
@@ -69,19 +63,16 @@ async def start_command(message: types.Message):
 async def handle_messages(message: types.Message):
     user_text = message.text.strip().lower()
 
-    # Инициализация состояния пользователя, если его нет
     user_id = message.from_user.id
     if user_id not in USER_STATE:
         USER_STATE[user_id] = {'category': None, 'seen_categories': [], 'seen_items': {'gifts': [], 'recipes': [], 'traditions': []}}
 
-    # Ответ на фразы типа "Как дела?", "Что нового?"
     if any(phrase in user_text for phrase in ["как дела", "что нового", "привет", "здравствуй"]):
         await message.reply("Привет! Я готов помочь выбрать идею для новогоднего ужина или подарка! Что тебя интересует?", reply_markup=create_main_keyboard())
         return
 
     response = "Простите, я не понял ваш запрос. Попробуйте выбрать один из вариантов выше или уточнить вопрос."
 
-    # Проверка на отказ от предложенной идеи
     if any(phrase in user_text for phrase in ["не нравится", "не хочу", "убери", "не хочется"]):
         category = USER_STATE[user_id].get('category')
 
@@ -120,7 +111,6 @@ async def handle_gift_selection(query: CallbackQuery):
     USER_STATE[user_id]['category'] = 'gifts'
     USER_STATE[user_id]['seen_categories'].append('gifts')
 
-    # Отправляем новый подарок
     available_gifts = [gift for gift in GIFT_IDEAS if gift not in USER_STATE[user_id]['seen_items']['gifts']]
     if available_gifts:
         response = random.choice(available_gifts)
@@ -141,7 +131,6 @@ async def handle_recipe_selection(query: CallbackQuery):
     USER_STATE[user_id]['category'] = 'recipes'
     USER_STATE[user_id]['seen_categories'].append('recipes')
 
-    # Отправляем новый рецепт
     available_recipes = [recipe for recipe in RECIPES if recipe not in USER_STATE[user_id]['seen_items']['recipes']]
     if available_recipes:
         response = random.choice(available_recipes)
@@ -162,7 +151,6 @@ async def handle_tradition_selection(query: CallbackQuery):
     USER_STATE[user_id]['category'] = 'traditions'
     USER_STATE[user_id]['seen_categories'].append('traditions')
 
-    # Отправляем новую традицию
     available_traditions = [tradition for tradition in TRADITIONS if tradition not in USER_STATE[user_id]['seen_items']['traditions']]
     if available_traditions:
         response = random.choice(available_traditions)
